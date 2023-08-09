@@ -67,6 +67,25 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User',userSchema)
 
 
+// ==========================TASK SCHEMA==========================
+
+const taskSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+    },
+    tasks: {
+      type: [String],
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
+
+const Task = mongoose.model("Task", taskSchema);
+
+
 
 
 
@@ -105,7 +124,7 @@ app.post("/login",async(req,res)=>{
             if(password !== user.password ){
                 res.status(400).json({message:"Invalid password"})
             }else{
-                res.status(200).json({message:"User Logged in succesfully"})
+                res.status(200).json({message:"User Logged in succesfully",user})
             }
         }
     } catch (error) {
@@ -124,6 +143,46 @@ app.get("/users",async(req,res)=>{
        res.status(500).json({message:"Something went wrong"})
     }
 })
+
+
+app.post("/addTask",async(req,res)=>{
+    try {
+        const { username,task} = req.body
+        let user = await Task.findOne({username})
+        if(!user){
+            user = new Task({
+                username,
+                tasks:task
+            })
+        }else{
+            user.tasks.push(...task)
+        }
+
+        await user.save()
+        res.status(201).json({message:"Task Added succesfully"})
+        
+    } catch (error) {
+       console.log("Error getting To added task", error);
+       res.status(500).json({ message: "Something went wrong" }); 
+    }
+})
+
+
+app.post("/getTask", async (req, res) => {
+  try {
+    const username = req.body.username;
+    const user = await Task.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    } else {
+      const tasks = user.tasks;
+      res.status(200).json(tasks);
+    }
+  } catch (error) {
+    console.log("Error getting To fetch task", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
 
 
 

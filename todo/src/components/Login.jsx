@@ -3,12 +3,16 @@ import { NavLink } from 'react-router-dom'
 import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { setUser } from '../redux/reducers/loginReducers'
+import { useDispatch } from 'react-redux'
+
 
 
 const Login = () => {
   const navigate = useNavigate()
   const nameRef = useRef(null)
   const passwordRef = useRef(null)
+  const dispatch = useDispatch()
 
   const handleLogin = async(e)=>{
     e.preventDefault()
@@ -21,6 +25,7 @@ const Login = () => {
         password
       })
       console.log(data.message)
+      dispatch(setUser(data.user)) // save user to the global store
       navigate("/todo",{state:{username:name}})
     } catch (error) {
       console.log("Error in Login user",error)

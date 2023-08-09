@@ -1,13 +1,15 @@
 import axios from 'axios';
 import './App.css'
-import { useState,useRef } from 'react'
+import { useState,useRef, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-
+import { useSelector } from 'react-redux';
 
 const Todo = () => {
     const location = useLocation() // using useLocation
     const [task, setTask] = useState([]);
     const taskInputRef = useRef()
+
+    const user = useSelector((state)=>state.login)
 
     const addTask=(e)=>{
         e.preventDefault()
@@ -19,6 +21,7 @@ const Todo = () => {
         console.log("Tasks are ",task)
 
     }
+
 
 
     const toggleTask=(index)=>{
@@ -41,13 +44,23 @@ const Todo = () => {
         }
     }
 
-
+    useEffect(()=>{
+        const fetchTask = async()=>{
+            try {
+                const response = await axios.post("http://localhost:4000/getTask",{username:location.state.username})
+                setTask(response.data)
+            } catch (error) {
+               console.log("Error called while fetching task",error) 
+            }
+        }
+        fetchTask()
+    },[location.state.username])
 
 
   return (
     <>
     <div  className='container' >
-      <h2>Todo List</h2>
+      <h2>{user.user.name} Todo List </h2>
       <div className="input-container">
         <input type="text" className='todoInput' placeholder='Add todo' ref={taskInputRef} />
         <button className='add-btn' onClick={addTask} >
